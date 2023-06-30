@@ -181,48 +181,139 @@
 
 
 			let us_battleship_louisiana;
+
 			// Dentro da função de carregamento do modelo us_battleship_louisiana
 			modelLoader.load('models/us_battleship_louisiana/scene.gltf', function (gltf) {
 				us_battleship_louisiana = gltf.scene;
 				us_battleship_louisiana.scale.set(3, 8, 3);
 				us_battleship_louisiana.position.set(0, 0, 0);
-				scene.add(us_battleship_louisiana);
-			
-				// Translação do modelo
-				const translationSpeed = 0.5; // Velocidade de translação
-				const translationDistance = 10; // Distância total da translação
-				let translationProgress = 0; // Progresso da translação
-			
-				function updateModelTranslation() {
-					// Atualiza a posição do modelo ao longo do eixo X
-					us_battleship_louisiana.translateZ(translationSpeed);
-			
-					// Verifica se o modelo atingiu a distância total da translação
-					translationProgress += translationSpeed;
-					if (translationProgress >= translationDistance) {
-						// Inverte a direção da translação
-						translationSpeed *= -1;
-						translationProgress = 0;
-					} else if (translationProgress <= -translationDistance) {
-						// Inverte a direção da translação
-						translationSpeed *= -1;
-						translationProgress = 0;
-					}
-				}
-			
-				// Função de animação para atualizar a translação do modelo
-				function animate() {
-					requestAnimationFrame(animate);
-			
-					updateModelTranslation();
-			
-					renderer.render(scene, camera);
-				}
-			
-				// Inicia a animação
-				//animate();
-			});
+				// Obtém a lista de texturas da pasta "textures"
+				const texturePath = 'models/us_battleship_louisiana/textures/';
+				const textureFiles = ['Material_2677_0_diffuse.png',
+					'Material_2677_diffuse.png',]
+				/*const textureFiles = [
+					'Chikugo-class_material_20_8_0_specularGlossiness.jpeg',
+					'Chikugo-class_material_20_8_diffuse.jpeg',
+					'Chikugo-class_material_20_8_specularGlossiness.jpeg',
+					'Chikugo-class_material_22_8_diffuse.jpeg',
+					'Chikugo-class_material_22_8_specularGlossiness.jpeg',
+					'Chikugo-class_material_8_8_diffuse.png',
+					'Chikugo-class_material_8_8_specularGlossiness.jpeg',
+					'Chikugo-class_material_20_8_0_diffuse.jpeg',
+					'Material_2677_0_diffuse.png',
+					'Material_2677_diffuse.png',
+					'Ohio_am433_mc_box_246_0_diffuse.png',
+					'Ohio_am433_mc_box_246_1_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_10_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_11_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_12_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_13_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_14_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_15_diffuse.png',
+					'Ohio_am433_mc_box_246_16_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_17_diffuse.png',
+					'Ohio_am433_mc_box_246_18_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_19_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_2_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_20_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_21_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_22_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_23_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_24_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_25_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_26_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_27_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_28_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_29_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_3_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_30_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_31_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_32_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_33_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_34_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_35_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_36_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_37_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_38_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_39_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_4_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_40_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_41_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_42_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_43_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_44_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_45_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_46_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_47_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_48_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_49_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_5_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_50_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_51_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_52_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_53_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_54_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_55_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_56_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_57_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_58_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_59_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_6_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_60_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_61_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_62_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_63_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_64_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_65_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_66_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_67_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_68_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_69_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_7_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_70_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_71_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_72_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_73_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_74_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_75_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_76_diffuse.png',
+					'Ohio_am433_mc_box_246_77_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_78_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_79_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_8_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_80_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_81_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_82_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_83_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_84_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_9_diffuse.jpeg',
+					'Ohio_am433_mc_box_246_diffuse.jpeg',
+				];
+*/
+				us_battleship_louisiana.traverse(function (object) {
+					if (object.isMesh) {
+						// Verifique se o objeto possui um material
+						if (object.material) {
+							object.material.roughness = 0.1
+							// Percorra cada arquivo de textura
+							for (const textureFile of textureFiles) {
+								// Construa o caminho completo da textura
+								const textureFilePath = texturePath + textureFile;
 
+								// Carregue a textura
+								const texture = new THREE.TextureLoader().load(textureFilePath);
+
+								// Crie um novo material com a textura carregada
+								const material = new THREE.MeshStandardMaterial({ map: texture });
+
+								// Atribua o novo material ao objeto
+								object.material = material.clone();
+							}
+						}
+					}
+				});
+				scene.add(us_battleship_louisiana)
+			});
 
 				modelLoader.load('models/free_sandy_rock_hill/scene.gltf', function (gltf) {
 					const model = gltf.scene;
@@ -241,6 +332,7 @@
 						if (object.isMesh) {
 							// Verifique se o objeto possui um material
 							if (object.material) {
+								object.material.roughness = 0.4
 								// Verifique se o material possui uma textura
 								if (object.material.map) {
 									// Obtenha o nome do arquivo da textura atual
