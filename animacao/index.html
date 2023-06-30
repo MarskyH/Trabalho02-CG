@@ -36,6 +36,7 @@
 		let camera, scene, renderer;
 		let controls, water, sun, mesh;
 		let us_battleship_louisiana;
+		let speedbirds_jet;
 
 		const modelLoader = new GLTFLoader();
 
@@ -177,7 +178,6 @@
 
 
 			let us_battleship_louisiana;
-
 			// Dentro da função de carregamento do modelo us_battleship_louisiana
 			modelLoader.load('models/us_battleship_louisiana/scene.gltf', function (gltf) {
 				us_battleship_louisiana = gltf.scene;
@@ -308,84 +308,132 @@
 						}
 					}
 				});
-				scene.add(us_battleship_louisiana)
+				//scene.add(us_battleship_louisiana)
 			});
 
-				modelLoader.load('models/free_sandy_rock_hill/scene.gltf', function (gltf) {
-					const model = gltf.scene;
+			let speedbirds_jet;
 
-					// Ajuste a posição do modelo
-					model.position.set(0, 8, 0);
+			// Dentro da função de carregamento do modelo us_battleship_louisiana
+			modelLoader.load('models/speedbirds_jet/scene.gltf', function (gltf) {
+				speedbirds_jet = gltf.scene;
+				speedbirds_jet.scale.set(10, 10, 10);
+				speedbirds_jet.position.set(0, 8, 0);
+				// Obtém a lista de texturas da pasta "textures"
+				const texturePath = 'models/speedbirds_jet/textures/';
+				const textureFiles = [
+					'Canopy_baseColor.png',
+					'Canopy_emissive.png',
+					'Canopy_metallicRoughness.png',
+					'Canopy_normal.png',
+					'Cockpit_baseColor.png',
+					'Cockpit_emissive.png',
+					'Cockpit_metallicRoughness.png',
+					'Cockpit_normal.png',
+					'material_baseColor.png',
+					'material_emissive.png',
+					'material_metallicRoughness.png',
+					'material_normal.png',
+				]
+				speedbirds_jet.traverse(function (object) {
+					if (object.isMesh) {
+						// Verifique se o objeto possui um material
+						if (object.material) {
+							// Percorra cada arquivo de textura
+							for (const textureFile of textureFiles) {
+								// Construa o caminho completo da textura
+								const textureFilePath = texturePath + textureFile;
 
-					// Ajuste a escala do modelo (se necessário)
-					model.scale.set(1, 1, 1);
+								// Carregue a textura
+								const texture = new THREE.TextureLoader().load(textureFilePath);
 
-					// Ajuste a rotação do modelo (se necessário)
-					model.rotation.set(0, Math.PI, 0);
+								// Crie um novo material com a textura carregada
+								const material = new THREE.MeshStandardMaterial({ map: texture });
 
-					// Percorra todos os materiais do modelo e adicione texturas
-					model.traverse(function (object) {
-						if (object.isMesh) {
-							// Verifique se o objeto possui um material
-							if (object.material) {
-								object.material.roughness = 0.4
-								// Verifique se o material possui uma textura
-								if (object.material.map) {
-									// Obtenha o nome do arquivo da textura atual
-									const textureFile = object.material.map.sourceFile;
-
-									// Construa o caminho completo da textura
-									const texturePath = 'models/free_sandy_rock_hill/textures/' + textureFile;
-
-									// Carregue a textura
-									const texture = new THREE.TextureLoader().load(texturePath);
-
-									// Crie um novo material com a textura carregada
-									const material = new THREE.MeshStandardMaterial({ map: texture });
-
-									// Atribua o novo material ao objeto
-									object.material = material;
-								}
+								// Atribua o novo material ao objeto
+								object.material = material.clone();
 							}
 						}
-					});
+					}
+				});
+				scene.add(speedbirds_jet)
+			});
 
-					scene.add(model); // Adicione o modelo à cena do three.js
+
+			modelLoader.load('models/free_sandy_rock_hill/scene.gltf', function (gltf) {
+				const model = gltf.scene;
+
+				// Ajuste a posição do modelo
+				model.position.set(0, 8, 0);
+
+				// Ajuste a escala do modelo (se necessário)
+				model.scale.set(1, 1, 1);
+
+				// Ajuste a rotação do modelo (se necessário)
+				model.rotation.set(0, Math.PI, 0);
+
+				// Percorra todos os materiais do modelo e adicione texturas
+				model.traverse(function (object) {
+					if (object.isMesh) {
+						// Verifique se o objeto possui um material
+						if (object.material) {
+							object.material.roughness = 0.4
+							// Verifique se o material possui uma textura
+							if (object.material.map) {
+								// Obtenha o nome do arquivo da textura atual
+								const textureFile = object.material.map.sourceFile;
+
+								// Construa o caminho completo da textura
+								const texturePath = 'models/free_sandy_rock_hill/textures/' + textureFile;
+
+								// Carregue a textura
+								const texture = new THREE.TextureLoader().load(texturePath);
+
+								// Crie um novo material com a textura carregada
+								const material = new THREE.MeshStandardMaterial({ map: texture });
+
+								// Atribua o novo material ao objeto
+								object.material = material;
+							}
+						}
+					}
 				});
 
+				scene.add(model); // Adicione o modelo à cena do three.js
+			});
 
 
 
-			}
+
+		}
 
 		function onWindowResize() {
 
-					camera.aspect = window.innerWidth / window.innerHeight;
-					camera.updateProjectionMatrix();
+			camera.aspect = window.innerWidth / window.innerHeight;
+			camera.updateProjectionMatrix();
 
-					renderer.setSize(window.innerWidth, window.innerHeight);
+			renderer.setSize(window.innerWidth, window.innerHeight);
 
-				}
+		}
 
 		function animate() {
 
-					requestAnimationFrame(animate);
-					render();
-					stats.update();
+			requestAnimationFrame(animate);
+			render();
+			stats.update();
 
-				}
+		}
 
 		function render() {
 
-					const time = performance.now() * 0.001;
+			const time = performance.now() * 0.001;
 
 
 
-					water.material.uniforms['time'].value += 1.0 / 60.0;
+			water.material.uniforms['time'].value += 1.0 / 60.0;
 
-					renderer.render(scene, camera);
+			renderer.render(scene, camera);
 
-				}
+		}
 
 	</script>
 </body>
