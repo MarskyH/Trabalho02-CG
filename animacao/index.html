@@ -297,6 +297,16 @@
 			});
 
 
+			let explosion_as_solid;
+
+			modelLoader.load('models/explosion_as_solid/scene.gltf', function (gltf) {
+				explosion_as_solid = gltf.scene;
+				explosion_as_solid.scale.set(40, 40, 40);
+				explosion_as_solid.position.set(0, 0, 0);
+
+				// Adicionar a explosão sólida à cena
+				scene.add(explosion_as_solid);
+			});
 
 
 			let speedbirds_Jet;
