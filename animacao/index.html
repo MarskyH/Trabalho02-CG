@@ -21,30 +21,31 @@
 		</script>
 
 	<script type="module">
-
+		// Importar as bibliotecas necessárias
 		import * as THREE from 'three';
 		import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 		import { Water } from 'three/addons/objects/Water.js';
 		import { Sky } from 'three/addons/objects/Sky.js';
 		import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-		let container
+		// Variáveis globais
+		let container;
 		let camera, scene, renderer;
 		let controls, water, sun, mesh;
 
+		// Cria uma instância do GLTFLoader
 		const modelLoader = new GLTFLoader();
 
+		//Inicar
 		init();
 		setTimeout(20000, animate())
 
-
+		// Função de inicialização
 		function init() {
-
-
+			// Obtém a referência para o elemento com o ID "container"
 			container = document.getElementById('container');
 
-			//
-
+			// Cria o renderer e configura seus parâmetros
 			renderer = new THREE.WebGLRenderer();
 			renderer.setPixelRatio(window.devicePixelRatio);
 			renderer.setSize(window.innerWidth, window.innerHeight);
@@ -53,30 +54,27 @@
 			renderer.toneMappingExposure = 0.4;
 			container.appendChild(renderer.domElement);
 
-			//
-
+			// Cria uma nova cena
 			scene = new THREE.Scene();
 
+			// Cria uma câmera perspectiva
 			camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 1, 20000);
 			camera.position.set(0, 1000, -3000);
 
-			//
-
+			// Cria um vetor para representar o sol
 			sun = new THREE.Vector3();
 
-			// Water
-
+			// Cria a geometria da água
 			const waterGeometry = new THREE.PlaneGeometry(10000, 10000);
 
+			// Cria a água com seus parâmetros
 			water = new Water(
 				waterGeometry,
 				{
 					textureWidth: 512,
 					textureHeight: 512,
 					waterNormals: new THREE.TextureLoader().load('textures/waternormals.jpg', function (texture) {
-
 						texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-
 					}),
 					sunDirection: new THREE.Vector3(),
 					sunColor: 0xFF8E38,
@@ -86,25 +84,25 @@
 				}
 			);
 
-			water.rotation.x = - Math.PI / 2;
+			// Rotaciona a água
+			water.rotation.x = -Math.PI / 2;
 
+			// Adiciona a água à cena
 			scene.add(water);
 
-			// Skybox
-
+			// Cria o céu
 			const sky = new Sky();
 			sky.scale.setScalar(10000);
-
-
 			scene.add(sky);
 
+			// Configura os parâmetros.
 			const skyUniforms = sky.material.uniforms;
-
 			skyUniforms['turbidity'].value = 10;
 			skyUniforms['rayleigh'].value = 2;
 			skyUniforms['mieCoefficient'].value = 0.005;
 			skyUniforms['mieDirectionalG'].value = 0.8;
 
+			// Configura os parâmetros do sol
 			const parameters = {
 				elevation: 0,
 				azimuth: 3
@@ -113,6 +111,7 @@
 			const pmremGenerator = new THREE.PMREMGenerator(renderer);
 			let renderTarget;
 
+			// Atualiza a posição do sol com base nos parâmetros
 			function updateSun() {
 
 				const phi = THREE.MathUtils.degToRad(90 - parameters.elevation);
@@ -141,7 +140,7 @@
 			controls.maxDistance = 10000.0;
 			controls.update();
 
-
+			//Cria modelo 3D Hydra
 			let hydra;
 			modelLoader.load('models/hydra/scene.gltf', function (gltf) {
 				hydra = gltf.scene;
@@ -173,9 +172,7 @@
 												function (normalMapTexture) {
 													material.normalMap = normalMapTexture;
 
-													// Aqui você pode ajustar outras propriedades do material, se necessário
-
-
+													hydra.rotateY(Math.PI);
 													// Adicionar o objeto hydra à cena
 													scene.add(hydra);
 												}
@@ -189,8 +186,8 @@
 				});
 			});
 
-			let old_lighthouse;;
-			// Dentro da função de carregamento do modelo old_lighthouse
+			//Cria modelo 3D old_lighthouse
+			let old_lighthouse;
 			modelLoader.load('models/old_lighthouse/scene.gltf', function (gltf) {
 				old_lighthouse = gltf.scene;
 				old_lighthouse.scale.set(100, 150, 100);
@@ -220,17 +217,17 @@
 						}
 					}
 				});
-
+				//Adiciona na cena
 				scene.add(old_lighthouse)
 			});
 
-
+			//Adicione modelo 3D us_battleship_louisiana
 			let us_battleship_louisiana;
 			// Dentro da função de carregamento do modelo us_battleship_louisiana
 			modelLoader.load('models/us_battleship_louisiana/scene.gltf', function (gltf) {
 				us_battleship_louisiana = gltf.scene;
-				us_battleship_louisiana.scale.set(3, 8, 3);
-				us_battleship_louisiana.position.set(0, 0, 0);
+				us_battleship_louisiana.scale.set(15, 15, 15);
+				us_battleship_louisiana.position.set(0, 0, -3000);
 				// Obtém a lista de texturas da pasta "textures"
 				const texturePath = 'models/us_battleship_louisiana/textures/';
 				const textureFiles = ['Material_2677_0_diffuse.png',
@@ -257,19 +254,20 @@
 						}
 					}
 				});
-
+				//Adiciona na cena
 				scene.add(us_battleship_louisiana)
 			});
 
+			//Adicione modelo 3D explosion_as_solid
 			let explosion_as_solid;
 			const clock = new THREE.Clock();
-
 			modelLoader.load('models/explosion_as_solid/scene.gltf', function (gltf) {
 				explosion_as_solid = gltf.scene;
 				explosion_as_solid.scale.set(100, 100, 100);
 				explosion_as_solid.position.set(0, 100, 3000);
 			});
 
+			//Função para iniciar a animação da explosão
 			function startExplosionAnimation() {
 				// Definir a duração total da explosão em segundos
 				const duration = 10;
@@ -364,7 +362,7 @@
 			let jetSpeed = 1; // Velocidade do jato
 			let jetDirection = 1; // Direção do jato (1 para direita, -1 para esquerda)
 
-			
+
 			// Função para criar um jato na formação
 			function createJet(x, y, z, rotationY) {
 				modelLoader.load('models/speedbirds_jet/scene.gltf', function (gltf) {
@@ -380,6 +378,7 @@
 
 					// Função de atualização do movimento do jato
 					function updateJetMovement() {
+						let speed = 0.01
 						// Ajustar a posição vertical do jato usando uma função seno
 						jet.position.y = y + Math.sin(Date.now() * 0.001 + offset) * 100;
 
@@ -388,8 +387,20 @@
 
 						window.addEventListener('keydown', function (event) {
 							if (event.key === 'w') {
-								jet.position.z += 0.01; // Ajuste esse valor para controlar a velocidade de movimento para frente
-							} 
+								jet.position.z += speed; // Ajuste esse valor para controlar a velocidade de movimento para frente
+							}
+							if (event.key === 's') {
+								jet.position.z -= speed; // Ajuste esse valor para controlar a velocidade de movimento para frente
+							}
+							if (event.key === 'a') {
+								jet.position.x += speed; // Ajuste esse valor para controlar a velocidade de movimento para frente
+							}
+							if (event.key === 'd') {
+								jet.position.y += speed; // Ajuste esse valor para controlar a velocidade de movimento para frente
+							}
+							if (event.key === 'u'){
+								speed = speed + 0.01
+							}
 						});
 
 						// Solicitar a próxima atualização do movimento
@@ -418,7 +429,6 @@
 			}
 
 			// Pedras
-
 			modelLoader.load('models/free_sandy_rock_hill/scene.gltf', function (gltf) {
 				const model = gltf.scene;
 
@@ -551,6 +561,7 @@
 
 		}
 
+		//Redimensioar janela
 		function onWindowResize() {
 
 			camera.aspect = window.innerWidth / window.innerHeight;
@@ -560,6 +571,7 @@
 
 		}
 
+		//animar
 		function animate() {
 
 			requestAnimationFrame(animate);
@@ -568,19 +580,16 @@
 
 		}
 
+		//Renderizar
 		function render() {
 
 			const time = performance.now() * 0.001;
-
-
-
 			water.material.uniforms['time'].value += 1.0 / 60.0;
-
 			renderer.render(scene, camera);
 
 		}
 
-
+	
 
 	</script>
 </body>
