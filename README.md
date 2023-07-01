@@ -11,11 +11,11 @@ João Paulo de Souza Rodrigues - 202004940039
 
 2 - Abrir ele no Visual Studio Code
 
+3 - rodar o comando npm install
 
-3 - Executar o código no index.html dentro da pasta animacao
+4 - Executar o código no index.html dentro da pasta animacao
 
 Obs 1: Instalar o node js na sua máquina
-
 
 Obs 2: Instalar no Visual Studio Code a extensão Live Server pode ajudar na para executar mais facilmente.
 
