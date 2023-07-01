@@ -23,16 +23,12 @@
 	<script type="module">
 
 		import * as THREE from 'three';
-
-		import Stats from 'three/addons/libs/stats.module.js';
-
-		import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 		import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 		import { Water } from 'three/addons/objects/Water.js';
 		import { Sky } from 'three/addons/objects/Sky.js';
 		import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-		let container, stats;
+		let container
 		let camera, scene, renderer;
 		let controls, water, sun, mesh;
 
@@ -40,7 +36,7 @@
 
 		init();
 		setTimeout(20000, animate())
-	
+
 
 		function init() {
 
@@ -135,16 +131,9 @@
 
 			}
 
-			updateSun();
-
-			//
-
-			const geometry = new THREE.BoxGeometry(30, 30, 30);
-			const material = new THREE.MeshStandardMaterial({ roughness: 0 });
 
 
-
-			//
+			// Controles
 			controls = new OrbitControls(camera, renderer.domElement);
 			controls.maxPolarAngle = Math.PI * 0.495;
 			controls.target.set(0, 10, 0);
@@ -152,30 +141,6 @@
 			controls.maxDistance = 10000.0;
 			controls.update();
 
-			//
-
-			stats = new Stats();
-			container.appendChild(stats.dom);
-
-			// GUI
-
-			const gui = new GUI();
-
-			const folderSky = gui.addFolder('Sky');
-			folderSky.add(parameters, 'elevation', 0, 90, 0.1).onChange(updateSun);
-			folderSky.add(parameters, 'azimuth', - 180, 180, 0.1).onChange(updateSun);
-			folderSky.open();
-
-			const waterUniforms = water.material.uniforms;
-
-			const folderWater = gui.addFolder('Water');
-			folderWater.add(waterUniforms.distortionScale, 'value', 8, 8, 0.1).name('distortionScale');
-			folderWater.add(waterUniforms.size, 'value', 10, 10, 0.1).name('size');
-			folderWater.open();
-
-			//
-
-			window.addEventListener('resize', onWindowResize);
 
 			let hydra;
 			modelLoader.load('models/hydra/scene.gltf', function (gltf) {
@@ -301,76 +266,106 @@
 			const clock = new THREE.Clock();
 
 			modelLoader.load('models/explosion_as_solid/scene.gltf', function (gltf) {
-			  explosion_as_solid = gltf.scene;
-			  explosion_as_solid.scale.set(100, 100, 100);
-			  explosion_as_solid.position.set(0, 0, 0);
-			
-			  // Adicionar as partículas da explosão à cena
-			  scene.add(explosion_as_solid);
-			
-			  // Iniciar a animação da explosão
-			  setTimeout(40000, startExplosionAnimation());
+				explosion_as_solid = gltf.scene;
+				explosion_as_solid.scale.set(100, 100, 100);
+				explosion_as_solid.position.set(0, 100, 3000);
 			});
-			
+
 			function startExplosionAnimation() {
-			  // Definir a duração total da explosão em segundos
-			  const duration = 3;
-			
-			  // Definir o tamanho inicial e final das partículas
-			  const initialSize = 0.1;
-			  const finalSize = 5;
-			
-			  // Definir a cor inicial e final das partículas
-			  const initialColor = new THREE.Color(1, 0.5, 0);
-			  const finalColor = new THREE.Color(1, 0, 0);
-			
-			  // Definir a velocidade de crescimento das partículas
-			  const growthSpeed = (finalSize - initialSize) / duration;
-			
-			  // Definir a corrente de tempo inicial
-			  let currentTime = 0;
-			
-			  // Função de atualização da animação
-			  function updateAnimation(deltaTime) {
-				// Atualizar o tempo atual
-				currentTime += deltaTime;
-			
-				// Calcular o tamanho e a cor das partículas com base no tempo atual
-				const size = initialSize + growthSpeed * currentTime;
-				const color = initialColor.clone().lerp(finalColor, currentTime / duration);
-			
-				// Atualizar o tamanho e a cor das partículas
-				explosion_as_solid.traverse(function (child) {
-				  if (child.isMesh) {
-					child.scale.set(size, size, size);
-					child.material.color.copy(color);
-				  }
-				});
-			
-				// Verificar se a explosão já terminou
-				if (currentTime >= duration) {
-				  // Remover as partículas da cena
-				  scene.remove(explosion_as_solid);
-			
-				  // Parar a atualização da animação
-				  renderer.setAnimationLoop(null);
+				// Definir a duração total da explosão em segundos
+				const duration = 10;
+
+				// Definir o tamanho inicial e final das partículas
+				const initialSize = 0.1;
+				const finalSize = 5;
+
+				// Definir a cor inicial e final das partículas
+				const initialColor = new THREE.Color(1, 0.5, 0);
+				const finalColor = new THREE.Color(1, 0, 0);
+
+				// Definir a velocidade de crescimento das partículas
+				const growthSpeed = (finalSize - initialSize) / duration;
+
+				// Definir a corrente de tempo inicial
+				let currentTime = 0;
+
+				// Função de atualização da animação
+				function updateAnimation(deltaTime) {
+					// Atualizar o tempo atual
+					currentTime += deltaTime;
+
+					// Verificar se a explosão está em sua fase de crescimento
+					if (currentTime <= duration) {
+						// Calcular o tamanho e a cor das partículas com base no tempo atual
+						const size = initialSize + growthSpeed * currentTime;
+						const color = initialColor.clone().lerp(finalColor, currentTime / duration);
+
+						// Atualizar o tamanho e a cor das partículas
+						explosion_as_solid.traverse(function (child) {
+							if (child.isMesh) {
+								child.scale.set(size, size, size);
+								child.material.color.copy(color);
+							}
+						});
+					} else {
+						// A explosão está em sua fase de encolhimento
+						// Calcular o tempo decorrido na fase de encolhimento
+						const shrinkTime = currentTime - duration;
+
+						// Calcular o tamanho e a cor das partículas durante o encolhimento
+						const size = finalSize - growthSpeed * shrinkTime;
+						const color = finalColor.clone().lerp(initialColor, shrinkTime / duration);
+
+						// Atualizar o tamanho e a cor das partículas durante o encolhimento
+						explosion_as_solid.traverse(function (child) {
+							scene.remove(hydra)
+							if (child.isMesh) {
+								child.scale.set(size, size, size);
+								child.material.color.copy(color);
+							}
+						});
+					}
+
+					// Verificar se a explosão já terminou
+					if (currentTime >= duration * 2) {
+						// Remover as partículas da cena
+						scene.remove(explosion_as_solid);
+
+						// Parar a atualização da animação
+						renderer.setAnimationLoop(null);
+					}
 				}
-			  }
-			
-			  // Iniciar o loop de animação
-			  renderer.setAnimationLoop(function () {
-				// Calcular o tempo decorrido desde o último quadro
-				const deltaTime = clock.getDelta();
-			
-				// Atualizar a animação da explosão
-				updateAnimation(deltaTime);
-			
-				// Renderizar a cena
-				renderer.render(scene, camera);
-			  });
+
+				// Iniciar o loop de animação
+				renderer.setAnimationLoop(function () {
+					// Calcular o tempo decorrido desde o último quadro
+					const deltaTime = clock.getDelta();
+
+					// Atualizar a animação da explosão
+					updateAnimation(deltaTime);
+
+					// Renderizar a cena
+					renderer.render(scene, camera);
+				});
 			}
-		
+
+			// Primeiro, adicione um ouvinte de evento para a janela
+			window.addEventListener('keydown', function (event) {
+				// Verifique se a tecla pressionada é a tecla desejada (por exemplo, a tecla 'E')
+				if (event.key === 'e') {
+					// Chame a função startExplosionAnimation() para iniciar a animação
+					startExplosionAnimation();
+
+					// Adicione explosion_as_solid à cena (substitua 'scene' pelo seu objeto de cena real)
+					scene.add(explosion_as_solid);
+				}
+			});
+
 			let speedbirds_Jet;
+			let jetSpeed = 1; // Velocidade do jato
+			let jetDirection = 1; // Direção do jato (1 para direita, -1 para esquerda)
+
+			
 			// Função para criar um jato na formação
 			function createJet(x, y, z, rotationY) {
 				modelLoader.load('models/speedbirds_jet/scene.gltf', function (gltf) {
@@ -387,10 +382,16 @@
 					// Função de atualização do movimento do jato
 					function updateJetMovement() {
 						// Ajustar a posição vertical do jato usando uma função seno
-						jet.position.y = y + Math.sin(Date.now() * 0.001 + offset) * 50;
+						jet.position.y = y + Math.sin(Date.now() * 0.001 + offset) * 100;
 
 						// Ajustar a posição horizontal do jato usando uma função cosseno
-						jet.position.x = x + Math.cos(Date.now() * 0.001 + offset) * 50;
+						jet.position.x = x + Math.cos(Date.now() * 0.001 + offset) * 100;
+
+						window.addEventListener('keydown', function (event) {
+							if (event.key === 'w') {
+								jet.position.z += 0.01; // Ajuste esse valor para controlar a velocidade de movimento para frente
+							} 
+						});
 
 						// Solicitar a próxima atualização do movimento
 						requestAnimationFrame(updateJetMovement);
@@ -545,7 +546,10 @@
 				scene.add(model); // Adicione o modelo à cena do three.js
 			});
 
-			// Pedras
+			updateSun();
+
+			window.addEventListener('resize', onWindowResize);
+
 		}
 
 		function onWindowResize() {
@@ -561,7 +565,7 @@
 
 			requestAnimationFrame(animate);
 			render();
-			stats.update();
+
 
 		}
 
@@ -576,6 +580,8 @@
 			renderer.render(scene, camera);
 
 		}
+
+
 
 	</script>
 </body>
