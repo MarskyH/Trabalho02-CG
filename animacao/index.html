@@ -39,7 +39,8 @@
 		const modelLoader = new GLTFLoader();
 
 		init();
-		animate();
+		setTimeout(20000, animate())
+	
 
 		function init() {
 
@@ -61,7 +62,7 @@
 			scene = new THREE.Scene();
 
 			camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 1, 20000);
-			camera.position.set(0, 6000, 0);
+			camera.position.set(0, 1000, -3000);
 
 			//
 
@@ -109,8 +110,8 @@
 			skyUniforms['mieDirectionalG'].value = 0.8;
 
 			const parameters = {
-				elevation: 2,
-				azimuth: 180
+				elevation: 0,
+				azimuth: 3
 			};
 
 			const pmremGenerator = new THREE.PMREMGenerator(renderer);
@@ -168,8 +169,8 @@
 			const waterUniforms = water.material.uniforms;
 
 			const folderWater = gui.addFolder('Water');
-			folderWater.add(waterUniforms.distortionScale, 'value', 0, 8, 0.1).name('distortionScale');
-			folderWater.add(waterUniforms.size, 'value', 0.1, 10, 0.1).name('size');
+			folderWater.add(waterUniforms.distortionScale, 'value', 8, 8, 0.1).name('distortionScale');
+			folderWater.add(waterUniforms.size, 'value', 10, 10, 0.1).name('size');
 			folderWater.open();
 
 			//
@@ -308,7 +309,7 @@
 			  scene.add(explosion_as_solid);
 			
 			  // Iniciar a animação da explosão
-			  startExplosionAnimation();
+			  setTimeout(40000, startExplosionAnimation());
 			});
 			
 			function startExplosionAnimation() {
