@@ -296,19 +296,79 @@
 				scene.add(us_battleship_louisiana)
 			});
 
-
 			let explosion_as_solid;
+			const clock = new THREE.Clock();
 
 			modelLoader.load('models/explosion_as_solid/scene.gltf', function (gltf) {
-				explosion_as_solid = gltf.scene;
-				explosion_as_solid.scale.set(40, 40, 40);
-				explosion_as_solid.position.set(0, 0, 0);
-
-				// Adicionar a explosão sólida à cena
-				scene.add(explosion_as_solid);
+			  explosion_as_solid = gltf.scene;
+			  explosion_as_solid.scale.set(100, 100, 100);
+			  explosion_as_solid.position.set(0, 0, 0);
+			
+			  // Adicionar as partículas da explosão à cena
+			  scene.add(explosion_as_solid);
+			
+			  // Iniciar a animação da explosão
+			  startExplosionAnimation();
 			});
-
-
+			
+			function startExplosionAnimation() {
+			  // Definir a duração total da explosão em segundos
+			  const duration = 3;
+			
+			  // Definir o tamanho inicial e final das partículas
+			  const initialSize = 0.1;
+			  const finalSize = 5;
+			
+			  // Definir a cor inicial e final das partículas
+			  const initialColor = new THREE.Color(1, 0.5, 0);
+			  const finalColor = new THREE.Color(1, 0, 0);
+			
+			  // Definir a velocidade de crescimento das partículas
+			  const growthSpeed = (finalSize - initialSize) / duration;
+			
+			  // Definir a corrente de tempo inicial
+			  let currentTime = 0;
+			
+			  // Função de atualização da animação
+			  function updateAnimation(deltaTime) {
+				// Atualizar o tempo atual
+				currentTime += deltaTime;
+			
+				// Calcular o tamanho e a cor das partículas com base no tempo atual
+				const size = initialSize + growthSpeed * currentTime;
+				const color = initialColor.clone().lerp(finalColor, currentTime / duration);
+			
+				// Atualizar o tamanho e a cor das partículas
+				explosion_as_solid.traverse(function (child) {
+				  if (child.isMesh) {
+					child.scale.set(size, size, size);
+					child.material.color.copy(color);
+				  }
+				});
+			
+				// Verificar se a explosão já terminou
+				if (currentTime >= duration) {
+				  // Remover as partículas da cena
+				  scene.remove(explosion_as_solid);
+			
+				  // Parar a atualização da animação
+				  renderer.setAnimationLoop(null);
+				}
+			  }
+			
+			  // Iniciar o loop de animação
+			  renderer.setAnimationLoop(function () {
+				// Calcular o tempo decorrido desde o último quadro
+				const deltaTime = clock.getDelta();
+			
+				// Atualizar a animação da explosão
+				updateAnimation(deltaTime);
+			
+				// Renderizar a cena
+				renderer.render(scene, camera);
+			  });
+			}
+		
 			let speedbirds_Jet;
 			// Função para criar um jato na formação
 			function createJet(x, y, z, rotationY) {
