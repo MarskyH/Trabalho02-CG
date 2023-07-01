@@ -1,0 +1,11 @@
+Model Information:
+* title:	Old Lighthouse
+* source:	https://sketchfab.com/3d-models/old-lighthouse-19e1ff049db74dc8b6173976417c1048
+* author:	Nirved Kamble (https://sketchfab.com/nirved)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Old Lighthouse" (https://sketchfab.com/3d-models/old-lighthouse-19e1ff049db74dc8b6173976417c1048) by Nirved Kamble (https://sketchfab.com/nirved) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
