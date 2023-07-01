@@ -11,6 +11,7 @@
 <body>
 
 	<div id="container"></div>
+	<script src="path/to/Tween.js"></script>
 	<script type="importmap">
 			{
 				"imports": {
@@ -31,41 +32,48 @@
 		// Variáveis globais
 		let container;
 		let camera, scene, renderer;
-		let controls, water, sun, mesh;
+		let controls, water, sun;
 
 		// Cria uma instância do GLTFLoader
 		const modelLoader = new GLTFLoader();
 
+
+
 		//Inicar
 		init();
-		setTimeout(20000, animate())
+		setTimeout( 20000, animate() );
 
 		// Função de inicialização
 		function init() {
+
+
+
+			//Clock para os loops e tempos das animações
+			const clock = new THREE.Clock();
 			// Obtém a referência para o elemento com o ID "container"
-			container = document.getElementById('container');
+			container = document.getElementById( 'container' );
 
 			// Cria o renderer e configura seus parâmetros
 			renderer = new THREE.WebGLRenderer();
-			renderer.setPixelRatio(window.devicePixelRatio);
-			renderer.setSize(window.innerWidth, window.innerHeight);
+			renderer.setPixelRatio( window.devicePixelRatio );
+			renderer.setSize( window.innerWidth, window.innerHeight );
 			renderer.useLegacyLights = false;
 			renderer.toneMapping = THREE.ACESFilmicToneMapping;
 			renderer.toneMappingExposure = 0.4;
-			container.appendChild(renderer.domElement);
+			container.appendChild( renderer.domElement );
 
 			// Cria uma nova cena
 			scene = new THREE.Scene();
 
 			// Cria uma câmera perspectiva
-			camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 1, 20000);
-			camera.position.set(0, 1000, -3000);
+			camera = new THREE.PerspectiveCamera( 100, window.innerWidth / window.innerHeight, 1, 20000 );
+			camera.position.set( 0, 1000, - 3000 );
 
 			// Cria um vetor para representar o sol
 			sun = new THREE.Vector3();
 
 			// Cria a geometria da água
-			const waterGeometry = new THREE.PlaneGeometry(10000, 10000);
+			const waterGeometry = new THREE.PlaneGeometry( 10000, 10000 );
 
 			// Cria a água com seus parâmetros
 			water = new Water(
@@ -73,9 +81,11 @@
 				{
 					textureWidth: 512,
 					textureHeight: 512,
-					waterNormals: new THREE.TextureLoader().load('textures/waternormals.jpg', function (texture) {
+					waterNormals: new THREE.TextureLoader().load( 'textures/waternormals.jpg', function ( texture ) {
+
 						texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-					}),
+		
+					} ),
 					sunDirection: new THREE.Vector3(),
 					sunColor: 0xFF8E38,
 					waterColor: 0x001e0f,
@@ -85,22 +95,22 @@
 			);
 
 			// Rotaciona a água
-			water.rotation.x = -Math.PI / 2;
+			water.rotation.x = - Math.PI / 2;
 
 			// Adiciona a água à cena
-			scene.add(water);
+			scene.add( water );
 
 			// Cria o céu
 			const sky = new Sky();
-			sky.scale.setScalar(10000);
-			scene.add(sky);
+			sky.scale.setScalar( 10000 );
+			scene.add( sky );
 
 			// Configura os parâmetros.
 			const skyUniforms = sky.material.uniforms;
-			skyUniforms['turbidity'].value = 10;
-			skyUniforms['rayleigh'].value = 2;
-			skyUniforms['mieCoefficient'].value = 0.005;
-			skyUniforms['mieDirectionalG'].value = 0.8;
+			skyUniforms[ 'turbidity' ].value = 10;
+			skyUniforms[ 'rayleigh' ].value = 2;
+			skyUniforms[ 'mieCoefficient' ].value = 0.005;
+			skyUniforms[ 'mieDirectionalG' ].value = 0.8;
 
 			// Configura os parâmetros do sol
 			const parameters = {
@@ -108,23 +118,23 @@
 				azimuth: 3
 			};
 
-			const pmremGenerator = new THREE.PMREMGenerator(renderer);
+			const pmremGenerator = new THREE.PMREMGenerator( renderer );
 			let renderTarget;
 
 			// Atualiza a posição do sol com base nos parâmetros
 			function updateSun() {
 
-				const phi = THREE.MathUtils.degToRad(90 - parameters.elevation);
-				const theta = THREE.MathUtils.degToRad(parameters.azimuth);
+				const phi = THREE.MathUtils.degToRad( 90 - parameters.elevation );
+				const theta = THREE.MathUtils.degToRad( parameters.azimuth );
 
-				sun.setFromSphericalCoords(1, phi, theta);
+				sun.setFromSphericalCoords( 1, phi, theta );
 
-				sky.material.uniforms['sunPosition'].value.copy(sun);
-				water.material.uniforms['sunDirection'].value.copy(sun).normalize();
+				sky.material.uniforms[ 'sunPosition' ].value.copy( sun );
+				water.material.uniforms[ 'sunDirection' ].value.copy( sun ).normalize();
 
-				if (renderTarget !== undefined) renderTarget.dispose();
+				if ( renderTarget !== undefined ) renderTarget.dispose();
 
-				renderTarget = pmremGenerator.fromScene(sky);
+				renderTarget = pmremGenerator.fromScene( sky );
 
 				scene.environment = renderTarget.texture;
 
@@ -133,25 +143,37 @@
 
 
 			// Controles
-			controls = new OrbitControls(camera, renderer.domElement);
+			controls = new OrbitControls( camera, renderer.domElement );
 			controls.maxPolarAngle = Math.PI * 0.495;
-			controls.target.set(0, 10, 0);
+			controls.target.set( 0, 10, 0 );
 			controls.minDistance = 40.0;
 			controls.maxDistance = 10000.0;
 			controls.update();
 
+
+			//Plano para a explosão
+			const whiteOverlayGeometry = new THREE.PlaneGeometry( 1000, 1000 );
+			const whiteOverlayMaterial = new THREE.MeshBasicMaterial( { color: 0xffffff } );
+			const whiteOverlay = new THREE.Mesh( whiteOverlayGeometry, whiteOverlayMaterial );
+			whiteOverlay.position.z = - 1; // Coloca o plano na frente de todos os objetos
+			scene.add( whiteOverlay );
+
 			//Cria modelo 3D Hydra
 			let hydra;
-			modelLoader.load('models/hydra/scene.gltf', function (gltf) {
-				hydra = gltf.scene;
-				hydra.scale.set(2000, 2500, 1500);
-				hydra.position.set(0, 100, 3000);
+			modelLoader.load( 'models/hydra/scene.gltf', function ( gltf ) {
 
-				hydra.traverse(function (object) {
-					if (object.isMesh) {
+				hydra = gltf.scene;
+				hydra.scale.set( 2000, 2500, 1500 );
+				hydra.position.set( 0, 100, 3000 );
+
+				hydra.traverse( function ( object ) {
+
+					if ( object.isMesh ) {
+
 						const mesh = object;
 						const material = mesh.material;
-						if (material.isMeshStandardMaterial) {
+						if ( material.isMeshStandardMaterial ) {
+
 							// Carregar as texturas
 							const baseColorTextureLoader = new THREE.TextureLoader();
 							const metallicRoughnessTextureLoader = new THREE.TextureLoader();
@@ -159,116 +181,178 @@
 
 							baseColorTextureLoader.load(
 								'models/hydra/textures/lambert2_baseColor.jpeg',
-								function (baseColorTexture) {
+								function ( baseColorTexture ) {
+
 									material.map = baseColorTexture;
 
 									metallicRoughnessTextureLoader.load(
 										'models/hydra/textures/lambert2_metallicRoughness.png',
-										function (metalnessTexture) {
+										function ( metalnessTexture ) {
+
 											material.metalnessMap = metalnessTexture;
 
 											normalMapTextureLoader.load(
 												'models/hydra/textures/lambert2_normal.png',
-												function (normalMapTexture) {
+												function ( normalMapTexture ) {
+
 													material.normalMap = normalMapTexture;
 
-													hydra.rotateY(Math.PI);
+													hydra.rotateY( Math.PI );
 													// Adicionar o objeto hydra à cena
-													scene.add(hydra);
+													scene.add( hydra );
+		
 												}
 											);
+		
 										}
 									);
+		
 								}
 							);
+		
 						}
+		
 					}
-				});
-			});
+		
+				} );
+		
+	} );
 
 			//Cria modelo 3D old_lighthouse
 			let old_lighthouse;
-			modelLoader.load('models/old_lighthouse/scene.gltf', function (gltf) {
+			modelLoader.load( 'models/old_lighthouse/scene.gltf', function ( gltf ) {
+
 				old_lighthouse = gltf.scene;
-				old_lighthouse.scale.set(100, 150, 100);
-				old_lighthouse.position.set(3000, 50, 2500);
+				old_lighthouse.scale.set( 100, 150, 100 );
+				old_lighthouse.position.set( 3000, 50, 2500 );
 				// Obtém a lista de texturas da pasta "textures"
 				const texturePath = 'models/old_lighthouse/textures/';
-				const textureFiles = ['Concrete_material_baseColor.png']
-				old_lighthouse.traverse(function (object) {
-					if (object.isMesh) {
+				const textureFiles = [ 'Concrete_material_baseColor.png' ];
+				old_lighthouse.traverse( function ( object ) {
+
+					if ( object.isMesh ) {
+
 						// Verifique se o objeto possui um material
-						if (object.material) {
-							object.material.roughness = 1
+						if ( object.material ) {
+
+							object.material.roughness = 1;
 							// Percorra cada arquivo de textura
-							for (const textureFile of textureFiles) {
+							for ( const textureFile of textureFiles ) {
+
 								// Construa o caminho completo da textura
 								const textureFilePath = texturePath + textureFile;
 
 								// Carregue a textura
-								const texture = new THREE.TextureLoader().load(textureFilePath);
+								const texture = new THREE.TextureLoader().load( textureFilePath );
 
 								// Crie um novo material com a textura carregada
-								const material = new THREE.MeshStandardMaterial({ map: texture });
+								const material = new THREE.MeshStandardMaterial( { map: texture } );
 
 								// Atribua o novo material ao objeto
 								object.material = material.clone();
+		
 							}
+		
 						}
+		
 					}
-				});
+		
+				} );
 				//Adiciona na cena
-				scene.add(old_lighthouse)
-			});
+				scene.add( old_lighthouse );
+		
+	} );
 
 			//Adicione modelo 3D us_battleship_louisiana
 			let us_battleship_louisiana;
 			// Dentro da função de carregamento do modelo us_battleship_louisiana
-			modelLoader.load('models/us_battleship_louisiana/scene.gltf', function (gltf) {
+			modelLoader.load( 'models/us_battleship_louisiana/scene.gltf', function ( gltf ) {
+
 				us_battleship_louisiana = gltf.scene;
-				us_battleship_louisiana.scale.set(15, 15, 15);
-				us_battleship_louisiana.position.set(0, 0, -3000);
+				us_battleship_louisiana.scale.set( 15, 15, 15 );
+				us_battleship_louisiana.position.set( 0, 0, - 3000 );
 				// Obtém a lista de texturas da pasta "textures"
 				const texturePath = 'models/us_battleship_louisiana/textures/';
-				const textureFiles = ['Material_2677_0_diffuse.png',
-					'Material_2677_diffuse.png',]
-				us_battleship_louisiana.traverse(function (object) {
-					if (object.isMesh) {
+				const textureFiles = [ 'Material_2677_0_diffuse.png',
+					'Material_2677_diffuse.png', ];
+				us_battleship_louisiana.traverse( function ( object ) {
+
+					if ( object.isMesh ) {
+
 						// Verifique se o objeto possui um material
-						if (object.material) {
-							object.material.roughness = 0.1
+						if ( object.material ) {
+
+							object.material.roughness = 0.1;
 							// Percorra cada arquivo de textura
-							for (const textureFile of textureFiles) {
+							for ( const textureFile of textureFiles ) {
+
 								// Construa o caminho completo da textura
 								const textureFilePath = texturePath + textureFile;
 
 								// Carregue a textura
-								const texture = new THREE.TextureLoader().load(textureFilePath);
+								const texture = new THREE.TextureLoader().load( textureFilePath );
 
 								// Crie um novo material com a textura carregada
-								const material = new THREE.MeshStandardMaterial({ map: texture });
+								const material = new THREE.MeshStandardMaterial( { map: texture } );
 
 								// Atribua o novo material ao objeto
 								object.material = material.clone();
+		
 							}
+		
 						}
+		
 					}
-				});
+		
+				} );
+
+				// Função de atualização do movimento do jato
+				function updateNavioMovement() {
+
+					const speed = 0.3;
+					const deltaTime = clock.getDelta(); // Certifique-se de ter uma instância de THREE.Clock chamada "clock" para controlar o tempo
+
+					// Define a amplitude e a frequência do movimento
+					const amplitude = 25; // Amplitude máxima do movimento
+					const frequency = 0.002; // Frequência do movimento (quão rápido sobe e desce) - valor menor para um movimento mais lento
+
+					// Calcula a posição vertical do navio
+					const newY = Math.sin( Date.now() * frequency ) * amplitude;
+
+					// Atualiza a posição do navio
+					us_battleship_louisiana.position.y = newY;
+					us_battleship_louisiana.position.z += speed * ( deltaTime + 0.5 );
+
+					// Solicita a próxima atualização do movimento
+					requestAnimationFrame( updateNavioMovement );
+		
+		
+				}
+
+				//Iniciando animação
+				updateNavioMovement();
+
 				//Adiciona na cena
-				scene.add(us_battleship_louisiana)
-			});
+				scene.add( us_battleship_louisiana );
+		
+	} );
 
 			//Adicione modelo 3D explosion_as_solid
 			let explosion_as_solid;
-			const clock = new THREE.Clock();
-			modelLoader.load('models/explosion_as_solid/scene.gltf', function (gltf) {
+
+
+			modelLoader.load( 'models/explosion_as_solid/scene.gltf', function ( gltf ) {
+
 				explosion_as_solid = gltf.scene;
-				explosion_as_solid.scale.set(100, 100, 100);
-				explosion_as_solid.position.set(0, 100, 3000);
-			});
+				explosion_as_solid.scale.set( 100, 100, 100 );
+				explosion_as_solid.position.set( 0, 100, 3000 );
+		
+	} );
+
 
 			//Função para iniciar a animação da explosão
 			function startExplosionAnimation() {
+
 				// Definir a duração total da explosão em segundos
 				const duration = 10;
 
@@ -277,178 +361,230 @@
 				const finalSize = 5;
 
 				// Definir a cor inicial e final das partículas
-				const initialColor = new THREE.Color(1, 0.5, 0);
-				const finalColor = new THREE.Color(1, 0, 0);
+				const initialColor = new THREE.Color( 1, 0.5, 0 );
+				const finalColor = new THREE.Color( 1, 0, 0 );
 
 				// Definir a velocidade de crescimento das partículas
-				const growthSpeed = (finalSize - initialSize) / duration;
+				const growthSpeed = ( finalSize - initialSize ) / duration;
 
 				// Definir a corrente de tempo inicial
 				let currentTime = 0;
 
 				// Função de atualização da animação
-				function updateAnimation(deltaTime) {
+				function updateAnimation( deltaTime ) {
+
+					console.log( currentTime, deltaTime );
 					// Atualizar o tempo atual
-					currentTime += deltaTime;
+					currentTime += ( deltaTime + 0.05 );
 
 					// Verificar se a explosão está em sua fase de crescimento
-					if (currentTime <= duration) {
+					if ( currentTime <= duration ) {
+
 						// Calcular o tamanho e a cor das partículas com base no tempo atual
 						const size = initialSize + growthSpeed * currentTime;
-						const color = initialColor.clone().lerp(finalColor, currentTime / duration);
+						const color = initialColor.clone().lerp( finalColor, currentTime / duration );
 
 						// Atualizar o tamanho e a cor das partículas
-						explosion_as_solid.traverse(function (child) {
-							if (child.isMesh) {
-								child.scale.set(size, size, size);
-								child.material.color.copy(color);
+						explosion_as_solid.traverse( function ( child ) {
+
+							if ( child.isMesh ) {
+
+								child.scale.set( size, size, size );
+								child.material.color.copy( color );
+		
 							}
-						});
+		
+						} );
+		
 					} else {
+
 						// A explosão está em sua fase de encolhimento
 						// Calcular o tempo decorrido na fase de encolhimento
 						const shrinkTime = currentTime - duration;
 
 						// Calcular o tamanho e a cor das partículas durante o encolhimento
 						const size = finalSize - growthSpeed * shrinkTime;
-						const color = finalColor.clone().lerp(initialColor, shrinkTime / duration);
+						const color = finalColor.clone().lerp( initialColor, shrinkTime / duration );
 
 						// Atualizar o tamanho e a cor das partículas durante o encolhimento
-						explosion_as_solid.traverse(function (child) {
-							scene.remove(hydra)
-							if (child.isMesh) {
-								child.scale.set(size, size, size);
-								child.material.color.copy(color);
+						explosion_as_solid.traverse( function ( child ) {
+
+							scene.remove( hydra );
+							if ( child.isMesh ) {
+
+								child.scale.set( size, size, size );
+								child.material.color.copy( color );
+		
 							}
-						});
+		
+						} );
+		
 					}
 
 					// Verificar se a explosão já terminou
-					if (currentTime >= duration * 2) {
+					if ( currentTime >= duration * 2 ) {
+
 						// Remover as partículas da cena
-						scene.remove(explosion_as_solid);
+						scene.remove( explosion_as_solid );
 
 						// Parar a atualização da animação
-						renderer.setAnimationLoop(null);
+						renderer.setAnimationLoop( null );
+		
 					}
+		
+		
 				}
 
 				// Iniciar o loop de animação
-				renderer.setAnimationLoop(function () {
+				renderer.setAnimationLoop( function () {
+
 					// Calcular o tempo decorrido desde o último quadro
 					const deltaTime = clock.getDelta();
 
 					// Atualizar a animação da explosão
-					updateAnimation(deltaTime);
+					updateAnimation( deltaTime );
 
 					// Renderizar a cena
-					renderer.render(scene, camera);
-				});
-			}
+					renderer.render( scene, camera );
+		
+		
+				} );
+		
+	}
 
 			// Primeiro, adicione um ouvinte de evento para a janela
-			window.addEventListener('keydown', function (event) {
+			window.addEventListener( 'keydown', function ( event ) {
+
 				// Verifique se a tecla pressionada é a tecla desejada (por exemplo, a tecla 'E')
-				if (event.key === 'e') {
+				if ( event.key === 'e' ) {
+
 					// Chame a função startExplosionAnimation() para iniciar a animação
 					startExplosionAnimation();
-
 					// Adicione explosion_as_solid à cena (substitua 'scene' pelo seu objeto de cena real)
-					scene.add(explosion_as_solid);
+					scene.add( explosion_as_solid );
+		
+		
 				}
-			});
-
-			let speedbirds_Jet;
-			let jetSpeed = 1; // Velocidade do jato
-			let jetDirection = 1; // Direção do jato (1 para direita, -1 para esquerda)
+		
+	} );
 
 
 			// Função para criar um jato na formação
-			function createJet(x, y, z, rotationY) {
-				modelLoader.load('models/speedbirds_jet/scene.gltf', function (gltf) {
+			function createJet( x, y, z, rotationY ) {
+
+				modelLoader.load( 'models/speedbirds_jet/scene.gltf', function ( gltf ) {
+
 					const jet = gltf.scene;
-					jet.scale.set(40, 40, 40);
-					jet.position.set(x, y, z);
+					jet.scale.set( 40, 40, 40 );
+					jet.position.set( x, y, z );
 					jet.rotation.y = rotationY;
 
-					scene.add(jet);
+					scene.add( jet );
 
 					// Gerar um deslocamento aleatório para o movimento suave
 					const offset = Math.random() * Math.PI * 2;
 
 					// Função de atualização do movimento do jato
 					function updateJetMovement() {
-						let speed = 0.01
+
+						let speed = 0.01;
 						// Ajustar a posição vertical do jato usando uma função seno
-						jet.position.y = y + Math.sin(Date.now() * 0.001 + offset) * 100;
+						jet.position.y = y + Math.sin( Date.now() * 0.001 + offset ) * 100;
 
 						// Ajustar a posição horizontal do jato usando uma função cosseno
-						jet.position.x = x + Math.cos(Date.now() * 0.001 + offset) * 100;
+						jet.position.x = x + Math.cos( Date.now() * 0.001 + offset ) * 100;
 
-						window.addEventListener('keydown', function (event) {
-							if (event.key === 'w') {
+						window.addEventListener( 'keydown', function ( event ) {
+
+							if ( event.key === 'w' ) {
+
 								jet.position.z += speed; // Ajuste esse valor para controlar a velocidade de movimento para frente
+		
 							}
-							if (event.key === 's') {
+
+							if ( event.key === 's' ) {
+
 								jet.position.z -= speed; // Ajuste esse valor para controlar a velocidade de movimento para frente
+		
 							}
-							if (event.key === 'a') {
+
+							if ( event.key === 'a' ) {
+
 								jet.position.x += speed; // Ajuste esse valor para controlar a velocidade de movimento para frente
+		
 							}
-							if (event.key === 'd') {
+
+							if ( event.key === 'd' ) {
+
 								jet.position.y += speed; // Ajuste esse valor para controlar a velocidade de movimento para frente
+		
 							}
-							if (event.key === 'u'){
-								speed = speed + 0.01
+
+							if ( event.key === 'u' ) {
+
+								speed = speed + 0.01;
+		
 							}
-						});
+		
+						} );
 
 						// Solicitar a próxima atualização do movimento
-						requestAnimationFrame(updateJetMovement);
+						requestAnimationFrame( updateJetMovement );
+		
 					}
 
 					// Iniciar o movimento do jato
 					updateJetMovement();
-				});
-			}
+		
+		
+				} );
+		
+	}
 
 
 
 			// Posições e rotações dos jatos na formação
 			const formation = [
-				{ x: 0, y: 1000, z: -400, rotationY: Math.PI / 2 }, // Jato central (atrás)
-				{ x: -600, y: 1000, z: 0, rotationY: Math.PI / 2 }, // Jato esquerdo
+				{ x: 0, y: 1000, z: - 400, rotationY: Math.PI / 2 }, // Jato central (atrás)
+				{ x: - 600, y: 1000, z: 0, rotationY: Math.PI / 2 }, // Jato esquerdo
 				{ x: 600, y: 1300, z: 0, rotationY: Math.PI / 2 }, // Jato central
-				{ x: 0, y: 1000, z: -800, rotationY: Math.PI / 2 }, // Jato traseiro (atrás de todos)
+				{ x: 0, y: 1000, z: - 800, rotationY: Math.PI / 2 }, // Jato traseiro (atrás de todos)
 			];
 
 			// Criar os jatos na formação
-			for (let i = 0; i < formation.length; i++) {
-				const jetInfo = formation[i];
-				createJet(jetInfo.x, jetInfo.y, jetInfo.z, jetInfo.rotationY);
-			}
+			for ( let i = 0; i < formation.length; i ++ ) {
+
+				const jetInfo = formation[ i ];
+				createJet( jetInfo.x, jetInfo.y, jetInfo.z, jetInfo.rotationY );
+		
+	}
 
 			// Pedras
-			modelLoader.load('models/free_sandy_rock_hill/scene.gltf', function (gltf) {
+			modelLoader.load( 'models/free_sandy_rock_hill/scene.gltf', function ( gltf ) {
+
 				const model = gltf.scene;
 
 				// Ajuste a posição do modelo
-				model.position.set(1500, 8, 0);
+				model.position.set( 1500, 8, 0 );
 
 				// Ajuste a escala do modelo (se necessário)
-				model.scale.set(1, 1, 1);
+				model.scale.set( 1, 1, 1 );
 
 				// Ajuste a rotação do modelo (se necessário)
-				model.rotation.set(0, Math.PI, 0);
+				model.rotation.set( 0, Math.PI, 0 );
 
 				// Percorra todos os materiais do modelo e adicione texturas
-				model.traverse(function (object) {
-					if (object.isMesh) {
+				model.traverse( function ( object ) {
+
+					if ( object.isMesh ) {
+
 						// Verifique se o objeto possui um material
-						if (object.material) {
-							object.material.roughness = 0.4
+						if ( object.material ) {
+
+							object.material.roughness = 0.4;
 							// Verifique se o material possui uma textura
-							if (object.material.map) {
+							if ( object.material.map ) {
+
 								// Obtenha o nome do arquivo da textura atual
 								const textureFile = object.material.map.sourceFile;
 
@@ -456,41 +592,52 @@
 								const texturePath = 'models/free_sandy_rock_hill/textures/' + textureFile;
 
 								// Carregue a textura
-								const texture = new THREE.TextureLoader().load(texturePath);
+								const texture = new THREE.TextureLoader().load( texturePath );
 
 								// Crie um novo material com a textura carregada
-								const material = new THREE.MeshStandardMaterial({ map: texture });
+								const material = new THREE.MeshStandardMaterial( { map: texture } );
 
 								// Atribua o novo material ao objeto
 								object.material = material;
+		
 							}
+		
 						}
+		
 					}
-				});
+		
+		
+				} );
 
-				scene.add(model); // Adicione o modelo à cena do three.js
-			});
+				scene.add( model ); // Adicione o modelo à cena do three.js
+		
+	} );
 
-			modelLoader.load('models/free_sandy_rock_hill/scene.gltf', function (gltf) {
+			modelLoader.load( 'models/free_sandy_rock_hill/scene.gltf', function ( gltf ) {
+
 				const model = gltf.scene;
 
 				// Ajuste a posição do modelo
-				model.position.set(4000, 0, 1500);
+				model.position.set( 4000, 0, 1500 );
 
 				// Ajuste a escala do modelo (se necessário)
-				model.scale.set(0.8, 0.7, 0.6);
+				model.scale.set( 0.8, 0.7, 0.6 );
 
 				// Ajuste a rotação do modelo (se necessário)
-				model.rotation.set(0, -2 * Math.PI, 0);
+				model.rotation.set( 0, - 2 * Math.PI, 0 );
 
 				// Percorra todos os materiais do modelo e adicione texturas
-				model.traverse(function (object) {
-					if (object.isMesh) {
+				model.traverse( function ( object ) {
+
+					if ( object.isMesh ) {
+
 						// Verifique se o objeto possui um material
-						if (object.material) {
-							object.material.roughness = 0.4
+						if ( object.material ) {
+
+							object.material.roughness = 0.4;
 							// Verifique se o material possui uma textura
-							if (object.material.map) {
+							if ( object.material.map ) {
+
 								// Obtenha o nome do arquivo da textura atual
 								const textureFile = object.material.map.sourceFile;
 
@@ -498,41 +645,52 @@
 								const texturePath = 'models/free_sandy_rock_hill/textures/' + textureFile;
 
 								// Carregue a textura
-								const texture = new THREE.TextureLoader().load(texturePath);
+								const texture = new THREE.TextureLoader().load( texturePath );
 
 								// Crie um novo material com a textura carregada
-								const material = new THREE.MeshStandardMaterial({ map: texture });
+								const material = new THREE.MeshStandardMaterial( { map: texture } );
 
 								// Atribua o novo material ao objeto
 								object.material = material;
+		
 							}
+		
 						}
+		
 					}
-				});
+		
+		
+				} );
 
-				scene.add(model); // Adicione o modelo à cena do three.js
-			});
+				scene.add( model ); // Adicione o modelo à cena do three.js
+		
+	} );
 
-			modelLoader.load('models/free_sandy_rock_hill/scene.gltf', function (gltf) {
+			modelLoader.load( 'models/free_sandy_rock_hill/scene.gltf', function ( gltf ) {
+
 				const model = gltf.scene;
 
 				// Ajuste a posição do modelo
-				model.position.set(-4000, 8, 2000);
+				model.position.set( - 4000, 8, 2000 );
 
 				// Ajuste a escala do modelo (se necessário)
-				model.scale.set(1, 1, 1);
+				model.scale.set( 1, 1, 1 );
 
 				// Ajuste a rotação do modelo (se necessário)
-				model.rotation.set(0, Math.PI, 0);
+				model.rotation.set( 0, Math.PI, 0 );
 
 				// Percorra todos os materiais do modelo e adicione texturas
-				model.traverse(function (object) {
-					if (object.isMesh) {
+				model.traverse( function ( object ) {
+
+					if ( object.isMesh ) {
+
 						// Verifique se o objeto possui um material
-						if (object.material) {
-							object.material.roughness = 0.4
+						if ( object.material ) {
+
+							object.material.roughness = 0.4;
 							// Verifique se o material possui uma textura
-							if (object.material.map) {
+							if ( object.material.map ) {
+
 								// Obtenha o nome do arquivo da textura atual
 								const textureFile = object.material.map.sourceFile;
 
@@ -540,24 +698,30 @@
 								const texturePath = 'models/free_sandy_rock_hill/textures/' + textureFile;
 
 								// Carregue a textura
-								const texture = new THREE.TextureLoader().load(texturePath);
+								const texture = new THREE.TextureLoader().load( texturePath );
 
 								// Crie um novo material com a textura carregada
-								const material = new THREE.MeshStandardMaterial({ map: texture });
+								const material = new THREE.MeshStandardMaterial( { map: texture } );
 
 								// Atribua o novo material ao objeto
 								object.material = material;
+		
 							}
+		
 						}
+		
 					}
-				});
+		
+		
+				} );
 
-				scene.add(model); // Adicione o modelo à cena do three.js
-			});
+				scene.add( model ); // Adicione o modelo à cena do three.js
+		
+	} );
 
 			updateSun();
 
-			window.addEventListener('resize', onWindowResize);
+			window.addEventListener( 'resize', onWindowResize );
 
 		}
 
@@ -567,14 +731,14 @@
 			camera.aspect = window.innerWidth / window.innerHeight;
 			camera.updateProjectionMatrix();
 
-			renderer.setSize(window.innerWidth, window.innerHeight);
+			renderer.setSize( window.innerWidth, window.innerHeight );
 
 		}
 
 		//animar
 		function animate() {
 
-			requestAnimationFrame(animate);
+			requestAnimationFrame( animate );
 			render();
 
 
@@ -583,13 +747,12 @@
 		//Renderizar
 		function render() {
 
-			const time = performance.now() * 0.001;
-			water.material.uniforms['time'].value += 1.0 / 60.0;
-			renderer.render(scene, camera);
+			water.material.uniforms[ 'time' ].value += 1.0 / 60.0;
+			renderer.render( scene, camera );
 
 		}
 
-	
+
 
 	</script>
 </body>
