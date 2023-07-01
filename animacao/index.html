@@ -35,8 +35,6 @@
 		let container, stats;
 		let camera, scene, renderer;
 		let controls, water, sun, mesh;
-		let us_battleship_louisiana;
-		let speedbirds_jet;
 
 		const modelLoader = new GLTFLoader();
 
@@ -63,7 +61,7 @@
 			scene = new THREE.Scene();
 
 			camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 1, 20000);
-			camera.position.set(100, 0, 100);
+			camera.position.set(0, 6000, 0);
 
 			//
 
@@ -99,6 +97,8 @@
 
 			const sky = new Sky();
 			sky.scale.setScalar(10000);
+
+
 			scene.add(sky);
 
 			const skyUniforms = sky.material.uniforms;
@@ -148,7 +148,7 @@
 			controls.maxPolarAngle = Math.PI * 0.495;
 			controls.target.set(0, 10, 0);
 			controls.minDistance = 40.0;
-			controls.maxDistance = 200.0;
+			controls.maxDistance = 10000.0;
 			controls.update();
 
 			//
@@ -175,6 +175,89 @@
 			//
 
 			window.addEventListener('resize', onWindowResize);
+
+			let hydra;
+			modelLoader.load('models/hydra/scene.gltf', function (gltf) {
+				hydra = gltf.scene;
+				hydra.scale.set(2000, 2500, 1500);
+				hydra.position.set(0, 100, 3000);
+
+				hydra.traverse(function (object) {
+					if (object.isMesh) {
+						const mesh = object;
+						const material = mesh.material;
+						if (material.isMeshStandardMaterial) {
+							// Carregar as texturas
+							const baseColorTextureLoader = new THREE.TextureLoader();
+							const metallicRoughnessTextureLoader = new THREE.TextureLoader();
+							const normalMapTextureLoader = new THREE.TextureLoader();
+
+							baseColorTextureLoader.load(
+								'models/hydra/textures/lambert2_baseColor.jpeg',
+								function (baseColorTexture) {
+									material.map = baseColorTexture;
+
+									metallicRoughnessTextureLoader.load(
+										'models/hydra/textures/lambert2_metallicRoughness.png',
+										function (metalnessTexture) {
+											material.metalnessMap = metalnessTexture;
+
+											normalMapTextureLoader.load(
+												'models/hydra/textures/lambert2_normal.png',
+												function (normalMapTexture) {
+													material.normalMap = normalMapTexture;
+
+													// Aqui você pode ajustar outras propriedades do material, se necessário
+
+
+													hydra.rotateY(Math.PI);
+													// Adicionar o objeto hydra à cena
+													scene.add(hydra);
+												}
+											);
+										}
+									);
+								}
+							);
+						}
+					}
+				});
+			});
+
+			let old_lighthouse;;
+			// Dentro da função de carregamento do modelo old_lighthouse
+			modelLoader.load('models/old_lighthouse/scene.gltf', function (gltf) {
+				old_lighthouse = gltf.scene;
+				old_lighthouse.scale.set(100, 150, 100);
+				old_lighthouse.position.set(3000, 50, 2500);
+				// Obtém a lista de texturas da pasta "textures"
+				const texturePath = 'models/old_lighthouse/textures/';
+				const textureFiles = ['Concrete_material_baseColor.png']
+				old_lighthouse.traverse(function (object) {
+					if (object.isMesh) {
+						// Verifique se o objeto possui um material
+						if (object.material) {
+							object.material.roughness = 1
+							// Percorra cada arquivo de textura
+							for (const textureFile of textureFiles) {
+								// Construa o caminho completo da textura
+								const textureFilePath = texturePath + textureFile;
+
+								// Carregue a textura
+								const texture = new THREE.TextureLoader().load(textureFilePath);
+
+								// Crie um novo material com a textura carregada
+								const material = new THREE.MeshStandardMaterial({ map: texture });
+
+								// Atribua o novo material ao objeto
+								object.material = material.clone();
+							}
+						}
+					}
+				});
+
+				scene.add(old_lighthouse)
+			});
 
 
 			let us_battleship_louisiana;
@@ -209,66 +292,65 @@
 						}
 					}
 				});
-				
+
 				scene.add(us_battleship_louisiana)
 			});
 
-			
-			let us_battleship_oregon;
-			// Dentro da função de carregamento do modelo us_battleship_louisiana
-			modelLoader.load('models/us_battleship_louisiana/scene.gltf', function (gltf) {
-				us_battleship_oregon = gltf.scene;
-				us_battleship_oregon.scale.set(3, 8, 3);
-				us_battleship_oregon.position.set(-1000, 8, -1000);
-				
-				scene.add(us_battleship_oregon)
-			});
 
-			let speedbirds_jet;
 
-			// Dentro da função de carregamento do modelo us_battleship_louisiana
+
+			let speedbirds_Jet;
+			let canopyMaterial, cockpitMaterial, materialMaterial;
+
 			modelLoader.load('models/speedbirds_jet/scene.gltf', function (gltf) {
-				speedbirds_jet = gltf.scene;
-				speedbirds_jet.scale.set(10, 10, 10);
-				speedbirds_jet.position.set(0, 8, 0);
-				// Obtém a lista de texturas da pasta "textures"
-				const texturePath = 'models/speedbirds_jet/textures/';
-				const textureFiles = [
-					'Canopy_baseColor.png',
-					'Canopy_emissive.png',
-					'Canopy_metallicRoughness.png',
-					'Canopy_normal.png',
-					'Cockpit_baseColor.png',
-					'Cockpit_emissive.png',
-					'Cockpit_metallicRoughness.png',
-					'Cockpit_normal.png',
-					'material_baseColor.png',
-					'material_emissive.png',
-					'material_metallicRoughness.png',
-					'material_normal.png',
-				]
-				speedbirds_jet.traverse(function (object) {
-					if (object.isMesh) {
-						// Verifique se o objeto possui um material
-						if (object.material) {
-							// Percorra cada arquivo de textura
-							for (const textureFile of textureFiles) {
-								// Construa o caminho completo da textura
-								const textureFilePath = texturePath + textureFile;
+				speedbirds_Jet = gltf.scene;
+				console.log(speedbirds_Jet)
+				speedbirds_Jet.scale.set(10, 10, 10);
+				speedbirds_Jet.position.set(0, 8, 0);
 
-								// Carregue a textura
-								const texture = new THREE.TextureLoader().load(textureFilePath);
+				// Atribuir nomes aos materiais do modelo 3D
+				canopyMaterial = speedbirds_Jet.getObjectByName('Canopy');
+				cockpitMaterial = speedbirds_Jet.getObjectByName('Cockpit');
+				materialMaterial = speedbirds_Jet.getObjectByName('Material');
 
-								// Crie um novo material com a textura carregada
-								const material = new THREE.MeshStandardMaterial({ map: texture });
+				// Carregar e atribuir as texturas para cada material
+				const textureLoader = new THREE.TextureLoader();
 
-								// Atribua o novo material ao objeto
-								object.material = material.clone();
-							}
-						}
-					}
-				});
-				//scene.add(speedbirds_jet)
+				// Canopy
+				const canopyBaseColorTexture = textureLoader.load('models/speedbirds_jet/textures/Canopy_baseColor.png');
+				const canopyEmissiveTexture = textureLoader.load('models/speedbirds_jet/textures/Canopy_emissive.png');
+				const canopyMetallicRoughnessTexture = textureLoader.load('models/speedbirds_jet/textures/Canopy_metallicRoughness.png');
+				const canopyNormalMapTexture = textureLoader.load('models/speedbirds_jet/textures/Canopy_normal.png');
+
+				canopyMaterial.map = canopyBaseColorTexture;
+				canopyMaterial.emissiveMap = canopyEmissiveTexture;
+				canopyMaterial.metalnessMap = canopyMetallicRoughnessTexture;
+				canopyMaterial.normalMap = canopyNormalMapTexture;
+
+				// Cockpit
+				const cockpitBaseColorTexture = textureLoader.load('models/speedbirds_jet/textures/Cockpit_baseColor.png');
+				const cockpitEmissiveTexture = textureLoader.load('models/speedbirds_jet/textures/Cockpit_emissive.png');
+				const cockpitMetallicRoughnessTexture = textureLoader.load('models/speedbirds_jet/textures/Cockpit_metallicRoughness.png');
+				const cockpitNormalMapTexture = textureLoader.load('models/speedbirds_jet/textures/Cockpit_normal.png');
+
+				cockpitMaterial.map = cockpitBaseColorTexture;
+				cockpitMaterial.emissiveMap = cockpitEmissiveTexture;
+				cockpitMaterial.metalnessMap = cockpitMetallicRoughnessTexture;
+				cockpitMaterial.normalMap = cockpitNormalMapTexture;
+
+				// Material
+				const materialBaseColorTexture = textureLoader.load('models/speedbirds_jet/textures/material_baseColor.png');
+				const materialEmissiveTexture = textureLoader.load('models/speedbirds_jet/textures/material_emissive.png');
+				const materialMetallicRoughnessTexture = textureLoader.load('models/speedbirds_jet/textures/material_metallicRoughness.png');
+				const materialNormalMapTexture = textureLoader.load('models/speedbirds_jet/textures/material_normal.png');
+
+				materialMaterial.map = materialBaseColorTexture;
+				materialMaterial.emissiveMap = materialEmissiveTexture;
+				materialMaterial.metalnessMap = materialMetallicRoughnessTexture;
+				materialMaterial.normalMap = materialNormalMapTexture;
+
+				// Adicionar o objeto speedbirds_jet à cena
+				scene.add(speedbirds_Jet);
 			});
 
 			// Pedras
@@ -314,7 +396,7 @@
 
 				scene.add(model); // Adicione o modelo à cena do three.js
 			});
-			
+
 			modelLoader.load('models/free_sandy_rock_hill/scene.gltf', function (gltf) {
 				const model = gltf.scene;
 
@@ -325,7 +407,7 @@
 				model.scale.set(0.8, 0.7, 0.6);
 
 				// Ajuste a rotação do modelo (se necessário)
-				model.rotation.set(0, -2*Math.PI, 0);
+				model.rotation.set(0, -2 * Math.PI, 0);
 
 				// Percorra todos os materiais do modelo e adicione texturas
 				model.traverse(function (object) {
@@ -356,7 +438,7 @@
 
 				scene.add(model); // Adicione o modelo à cena do three.js
 			});
-			
+
 			modelLoader.load('models/free_sandy_rock_hill/scene.gltf', function (gltf) {
 				const model = gltf.scene;
 
@@ -398,7 +480,7 @@
 
 				scene.add(model); // Adicione o modelo à cena do three.js
 			});
-			
+
 			// Pedras
 		}
 
